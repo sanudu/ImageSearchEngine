@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Search</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        input {
+            padding: 10px;
+            width: 60%;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .image-container {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .image-container img {
+            width: 200px;
+            height: auto;
+            margin: 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .message {
+            color: red;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Image Search</h1>
+    <input type="text" id="searchInput" placeholder="Enter keyword...">
+    <button onclick="searchImages()">Search</button>
+
+    <p class="message" id="message"></p>
+
+    <div class="image-container" id="imageContainer"></div>
+
+    <script>
+        async function searchImages() {
+            const keyword = document.getElementById("searchInput").value.trim();
+            const imageContainer = document.getElementById("imageContainer");
+            const message = document.getElementById("message");
+
+            if (!keyword) {
+                message.textContent = "Please enter a keyword.";
+                return;
+            }
+
+            message.textContent = "";
+            imageContainer.innerHTML = "";
+
+            try {
+                const response = await fetch(`http://127.0.0.1:8000/search?keyword=${encodeURIComponent(keyword)}`);
+                if (!response.ok) {
+                    throw new Error("No matching images found.");
+                }
+
+                const imageFilenames = await response.json();
+                if (imageFilenames.length === 0) {
+                    message.textContent = "No images found.";
+                    return;
+                }
+
+                imageFilenames.forEach(filename => {
+                    const img = document.createElement("img");
+                    img.src = `http://127.0.0.1:8000/image/${filename}`;
+                    img.alt = filename;
+                    imageContainer.appendChild(img);
+                });
+
+            } catch (error) {
+                message.textContent = error.message;
+            }
+        }
+    </script>
+
+</body>
+
+</html>
